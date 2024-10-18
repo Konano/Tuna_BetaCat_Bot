@@ -60,6 +60,19 @@ except Exception:
     weather_msgid = 0
 
 
+async def rain_alert(bot: Bot, text: str):
+    """降雨预警"""
+    global alert_text, weather_msgid
+    if alert_text == text:
+        return
+    alert_text = text
+    await delete_msg(group, weather_msgid)
+    msg: Message = await bot.send_message(chat_id=group, text=text)
+    weather_msgid = msg.message_id
+    with open('data/weather_msgid.json', 'w') as file:
+        json.dump(weather_msgid, file)
+
+
 async def forecast_rain(bot: Bot):
     """根据两小时内的降雨预测发出预警"""
     if caiyunData == {} or caiyunData['result']['minutely']['status'] != 'ok':
@@ -93,19 +106,6 @@ async def forecast_rain(bot: Bot):
 
     global rainfall
     rainfall = rain_2h or rain_60 or rain_15 or rain_0
-
-
-async def rain_alert(bot: Bot, text: str):
-    """降雨预警"""
-    global alert_text, weather_msgid
-    if alert_text == text:
-        return
-    alert_text = text
-    await delete_msg(group, weather_msgid)
-    msg: Message = await bot.send_message(chat_id=group, text=text)
-    weather_msgid = msg.message_id
-    with open('data/weather_msgid.json', 'w') as file:
-        json.dump(weather_msgid, file)
 
 
 # ==================== alert ====================
