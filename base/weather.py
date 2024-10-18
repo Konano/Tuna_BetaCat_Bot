@@ -319,7 +319,7 @@ async def caiyun_api(longitude, latitude):
     """
     url = 'https://api.caiyunapp.com/v2.6/%s/%s,%s/weather.json?lang=zh_CN&alert=true' % (
         caiyunToken, longitude, latitude)
-    data = await network.get_dict(url, timeout=5)
+    data = await network.get_dict(url, timeout=10)
     if data.get('status') != 'ok':
         raise CaiyunAPIError(f'彩云天气 API 返回错误: {json.dumps(data)}')
     return data

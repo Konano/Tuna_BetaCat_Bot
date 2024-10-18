@@ -269,7 +269,8 @@ async def weather_poll(context: ContextTypes.DEFAULT_TYPE):
             await alert_info_update(context.bot)
             remain_minutes = 5 if rainfall else 15
         else:
-            remain_minutes = 5
+            # 如果更新失败则 2mins 后重试
+            remain_minutes = 2
         logger.debug(f'next update: {remain_minutes} mins')
 
 
@@ -289,7 +290,7 @@ async def realtime_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def realtime_forecast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """实时降雨预报"""
     assert update.message
-    await weather_update()
+    # await weather_update()  # 由于彩云天气 API 不稳定，运行命令时不再实时获取最新的天气数据
     if caiyunData == {} or caiyunData['result']['minutely']['status'] != 'ok':
         await update.message.reply_text('天气数据获取失败')
         return
