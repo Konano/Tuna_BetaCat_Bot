@@ -1,7 +1,7 @@
 import sys
 import logging
 import colorlog
-from utils.config import config
+from base.config import config
 
 BASIC_FORMAT = '%(asctime)s - %(levelname)s - %(lineno)d - %(funcName)s - %(message)s'
 COLOR_FORMAT = '%(log_color)s%(asctime)s - %(levelname)s - %(lineno)d - %(funcName)s - %(message)s'

@@ -1,3 +1,10 @@
+config.ini
+data/*
+log/*
+secret/*
+tmp/*
+
+.vscode/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
@@ -143,11 +150,3 @@ dmypy.json
 cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/python
-
-config.ini
-config-dev.ini
-data/*
-log/*
-log-dev/*
-secret/*
-pic/*

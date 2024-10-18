@@ -1,11 +1,12 @@
 import json
 import traceback
+
 from telegram.error import BadRequest
 
-from utils.log import logger
-from utils.config import config, owner, group, channel
-from utils.format import escaped
-from utils.crawler import request
+from base.config import channel, config, group
+from base.crawler import request
+from base.format import escaped
+from base.log import logger
 
 start_probability = 0.8
 stop_probability = 0.1
@@ -300,12 +301,13 @@ def realtime_report(bot, text):
             except BadRequest as e:
                 logger.debug(e)
             realtime['text'] = text
-            realtime['msgid'] = bot.send_message(chat_id=group, text=text).message_id
+            realtime['msgid'] = bot.send_message(
+                chat_id=group, text=text).message_id
             realtime['newmsg'] = False
         elif realtime['text'] != text:
             realtime['text'] = text
             bot.edit_message_text(chat_id=group, text=text,
-                                message_id=realtime['msgid'])
+                                  message_id=realtime['msgid'])
         with open('data/realtime.json', 'w') as file:
             json.dump(realtime, file)
     except Exception as e:
@@ -362,7 +364,8 @@ def caiyun(context):
         logger.debug(traceback.format_exc())
         caiyunFailedCount += 1
         if caiyunFailedCount == 1 or caiyunFailedCount % 5 == 0:
-            logger.warning(f'Failed to get data from CaiYun. ({caiyunFailedCount})')
+            logger.warning(
+                f'Failed to get data from CaiYun. ({caiyunFailedCount})')
         return
 
     forecast_rain(context.bot)

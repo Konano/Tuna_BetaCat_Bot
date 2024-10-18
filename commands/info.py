@@ -1,11 +1,14 @@
 import json
 import traceback
 
-from utils.log import logger
-from utils.format import escaped
-from utils.webvpn import webvpn
-from utils.config import group
-import utils.mute as mt
+from telegram import Update
+from telegram.ext import ContextTypes
+
+import base.mute as mt
+from base.config import group
+from base.format import escaped
+from base.log import logger
+from base.webvpn import webvpn
 
 try:
     with open('data/today.json', 'r') as file:
@@ -14,8 +17,8 @@ except:
     today = {}
 
 
-def info(update, context):
-
+async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    assert update.channel_post and update.channel_post.text
     try:
         rev = json.loads(update.channel_post.text)
         logger.info(rev)
@@ -28,7 +31,7 @@ def info(update, context):
             if data['source'] not in mt.muted:
                 text = 'Info %s\n[%s](%s) [\\(webvpn\\)](%s)' % (escaped(
                     data['source']), escaped(data['title']), data['url'], webvpn(data['url']))
-                msg = context.bot.send_message(
+                msg = await context.bot.send_message(
                     chat_id=group, text=text, parse_mode='MarkdownV2', disable_web_page_preview=True)
                 today[url]['msgid'] = msg.message_id
 
@@ -36,10 +39,9 @@ def info(update, context):
             url = data
             if url in today.keys():
                 if today[url]['msgid'] is not None:
-                    context.bot.delete_message(
-                        chat_id=group, message_id=today[url]['msgid'])
+                    await context.bot.delete_message(chat_id=group, message_id=today[url]['msgid'])
                 del today[url]
-        
+
         with open('data/today.json', 'w') as file:
             json.dump(today, file)
 

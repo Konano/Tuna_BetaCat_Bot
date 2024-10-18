@@ -2,21 +2,26 @@
 import os
 import time
 import traceback
-import numpy as np
+from pathlib import Path
+
 import matplotlib
 import matplotlib.pyplot as plt
-from pathlib import Path
-matplotlib.use('Agg')
+import numpy as np
+from telegram import Update
+from telegram.ext import ContextTypes
 
-import utils.caiyun as cy
-from utils.caiyun import deal_skycon, wind_direction, deal_precipitation, level_windspeed, alert_now
-from utils.log import logger
-from utils.pool import add_pool
+import base.caiyun as cy
+from base.caiyun import (alert_now, deal_precipitation, deal_skycon,
+                         level_windspeed, wind_direction)
+from base.log import logger
+from base.pool import add_pool
+
+matplotlib.use('Agg')
 
 
 def precipitation_graph():
 
-    pic = f'pic/{int(time.time())}.png'
+    pic = f'./pic/{int(time.time())}.png'
     logger.info(f'\\precipitation_graph {pic}')
 
     try:
@@ -24,9 +29,9 @@ def precipitation_graph():
             os.makedirs('pic/')
 
         precipitation = cy.caiyunData['result']['minutely']['precipitation_2h']
-        plt.figure(figsize=(6,3))
+        plt.figure(figsize=(6, 3))
         plt.plot(np.arange(120), np.array(precipitation))
-        plt.ylim(bottom = 0)
+        plt.ylim(bottom=0)
         if plt.axis()[3] > 0.03:
             plt.hlines(0.03, 0, 120, colors='skyblue', linestyles='dashed')
         if plt.axis()[3] > 0.25:
@@ -36,7 +41,7 @@ def precipitation_graph():
         if plt.axis()[3] > 0.48:
             plt.hlines(0.48, 0, 120, colors='darkred', linestyles='dashed')
 
-        plt.title('precipitation in 2 hours')
+        plt.title('Precipitation in 2 hours')
         plt.savefig(pic)
         plt.close('all')
     except Exception as e:
@@ -58,18 +63,12 @@ def forecast(update, context):
     Path(pic).unlink()
 
 
-def forecast_hourly(update, context):
-
-    logger.info('\\forecast_hourly {}'.format(update.message.chat_id))
-
-    context.bot.send_message(chat_id=update.message.chat_id,
-                             text=cy.caiyunData['result']['hourly']['description'])
+async def forecast_hourly(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await context.bot.send_message(chat_id=update.message.chat_id, text=cy.caiyunData['result']['hourly']['description'])
 
 
-def weather(update, context):
-
-    logger.info('\\weather {}'.format(update.message.chat_id))
-
+async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    assert update.effective_chat
     assert cy.caiyunData['result']['realtime']['status'] == 'ok'
 
     text = ''
@@ -102,4 +101,4 @@ def weather(update, context):
     if alert_now() != []:
         text += '现挂预警信号：{}\n'.format(' '.join(alert_now()))
 
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    await update.effective_chat.send_message(text)

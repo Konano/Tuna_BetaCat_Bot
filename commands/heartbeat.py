@@ -1,13 +1,10 @@
-import requests
+from telegram.ext import ContextTypes
 
-from utils.log import logger
-from utils.config import heartbeatURL
+from base import network
+from base.config import heartbeatURL
+from base.log import logger
 
 
-def sendHeartbeat(context):
-
+async def send_heartbeat(context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.debug('heartbeat')
-    try:
-        requests.get(url=heartbeatURL, timeout=(5, 10))
-    except Exception as e:
-        logger.error(e)
+    await network.get(url=heartbeatURL)
