@@ -27,7 +27,7 @@ class ErrorStatusCode(Exception):
         return f'ErrorStatusCode ({self.status_code}:{self.archive})'
 
 
-def attempt(times: int):
+def attempt(times: int, wait: int = 5):
     def decorate(func):
         @functools.wraps(func)
         async def wrap(*args, **kwargs):
@@ -40,7 +40,8 @@ def attempt(times: int):
                     eprint(e, logging.DEBUG)
                 except Exception as e:
                     raise e
-                await asyncio.sleep(5)
+                if wait > 0:
+                    await asyncio.sleep(wait)
             else:
                 raise ErrorAfterAttempts(f'Network error in {times} attempts')
         return wrap

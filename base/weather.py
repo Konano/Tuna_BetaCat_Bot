@@ -1,7 +1,9 @@
 import json
 
-from base import network
+import aiohttp
+
 from base.config import caiyunToken
+from base.network import attempt
 
 # ==================== function ====================
 
@@ -313,13 +315,24 @@ def now_weather(data: dict) -> str:
     return text
 
 
+@attempt(5, wait=0)
+async def caiyun_api_get(url: str, timeout: float = 1, **kwargs) -> dict:
+    # 针对一个 api 行为的猜测：对于非家宽 IP，服务器有 1/2 的概率无响应
+    # 为了提高成功率，设置 1s 超时，且重试 5 次。如果假设成立的话，失败的概率只有 1/32，且不会超过 5s
+    _timeout = aiohttp.ClientTimeout(total=timeout)
+    async with aiohttp.request('GET', url, timeout=_timeout, **kwargs) as r:
+        data = await r.json()
+    assert isinstance(data, dict), f'Expect dict, but got {type(data)}'
+    return data
+
+
 async def caiyun_api(longitude, latitude):
     """
     获取彩云天气数据
     """
     url = 'https://api.caiyunapp.com/v2.6/%s/%s,%s/weather.json?lang=zh_CN&alert=true' % (
         caiyunToken, longitude, latitude)
-    data = await network.get_dict(url, timeout=10)
+    data = await caiyun_api_get(url)
     if data.get('status') != 'ok':
         raise CaiyunAPIError(f'彩云天气 API 返回错误: {json.dumps(data)}')
     return data

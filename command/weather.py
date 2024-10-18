@@ -279,7 +279,7 @@ async def weather_poll(context: ContextTypes.DEFAULT_TYPE):
 async def realtime_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """实时天气预报"""
     assert update.message
-    # await weather_update()  # 由于彩云天气 API 不稳定，运行命令时不再实时获取最新的天气数据
+    await weather_update()
     if caiyunData != {} and caiyunData['result']['realtime']['status'] == 'ok':
         text = now_weather(caiyunData)
         await update.message.reply_text(text)
@@ -290,7 +290,7 @@ async def realtime_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def realtime_forecast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """实时降雨预报"""
     assert update.message
-    # await weather_update()  # 由于彩云天气 API 不稳定，运行命令时不再实时获取最新的天气数据
+    await weather_update()
     if caiyunData == {} or caiyunData['result']['minutely']['status'] != 'ok':
         await update.message.reply_text('天气数据获取失败')
         return
