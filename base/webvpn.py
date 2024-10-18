@@ -1,5 +1,6 @@
-import re
 import binascii
+import re
+
 from Crypto.Cipher import AES
 
 

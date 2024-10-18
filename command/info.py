@@ -61,3 +61,14 @@ def info_daily(clear=True):
         with open('data/today.json', 'w') as file:
             json.dump(today, file)
     return ret
+
+
+async def daily_report(context: ContextTypes.DEFAULT_TYPE):
+    text = 'Today Info:'
+    today = info_daily()
+    for source in today.keys():
+        text += '\n \\- %s' % escaped(source)
+        for news in today[source]:
+            text += '\n[%s](%s)' % (escaped(news['title']), news['url'])
+    await context.bot.send_message(
+        chat_id=group, text=text, parse_mode='MarkdownV2', disable_web_page_preview=True)

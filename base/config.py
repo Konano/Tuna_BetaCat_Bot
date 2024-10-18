@@ -9,7 +9,11 @@ group = config['BOT'].getint('group')
 channel = config['BOT'].getint('channel')
 pipe = config['BOT'].getint('pipe')
 
+logFile = config['BOT']['logpath'] + 'server'
+
 heartbeatURL = config['BOT'].get('heartbeat')
+
+caiyunToken = config['CAIYUN']['token']
 
 webhookConfig = {
     'listen': config['WEBHOOK']['listen'],

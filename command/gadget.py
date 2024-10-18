@@ -14,7 +14,7 @@ from pyzbar.pyzbar import decode
 from telegram import InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 
-import base.caiyun as cy
+# import base.caiyun as cy
 from base.debug import eprint
 from base.format import escaped
 from base.log import logger

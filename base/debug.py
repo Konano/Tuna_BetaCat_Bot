@@ -21,7 +21,7 @@ def exception_desc(e: Exception) -> str:
     return f'{e.__class__.__module__}.{e.__class__.__name__}'
 
 
-def eprint(e: Exception, level: int = logging.WARNING, msg: Optional[str] = None, stacklevel: int = 2) -> None:
+def eprint(e: Exception, level: int = logging.WARNING, msg: Optional[str] = None, stacklevel: int = 2, print_trace=True) -> None:
     """
     Print exception with traceback.
     """
@@ -34,10 +34,11 @@ def eprint(e: Exception, level: int = logging.WARNING, msg: Optional[str] = None
     exception_str = f'Exception: {exception_desc(e)}'
     logger.log(level, exception_str, stacklevel=stacklevel)
 
-    logger.debug(traceback.format_exc(), stacklevel=stacklevel)
+    if print_trace:
+        logger.debug(traceback.format_exc(), stacklevel=stacklevel)
 
 
-def try_except(level: int = logging.WARNING, msg: Optional[str] = None, return_value: bool = True, exclude=(IgnoreWarning)) -> Callable:
+def try_except(level: int = logging.WARNING, msg: Optional[str] = None, return_value: bool = True, exclude=(IgnoreWarning,)) -> Callable:
     """
     Try to execute the function.
     If an exception is raised, log it in debug level and return True/False or Return/None.

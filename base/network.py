@@ -1,11 +1,7 @@
 import asyncio
 import functools
-import json
 import logging
 from asyncio.exceptions import TimeoutError
-from http.cookies import Morsel
-from io import BytesIO
-from pathlib import Path
 from typing import Optional
 
 import aiohttp
@@ -38,7 +34,9 @@ def attempt(times: int):
             for _ in range(times):
                 try:
                     return await func(*args, **kwargs)
-                except (ErrorStatusCode, TimeoutError, ContentTypeError, AssertionError) as e:
+                except TimeoutError as e:
+                    eprint(e, logging.DEBUG, print_trace=False)
+                except (ErrorStatusCode, ContentTypeError, AssertionError) as e:
                     eprint(e, logging.DEBUG)
                 except Exception as e:
                     raise e
@@ -147,126 +145,3 @@ async def post_status(url: str, data=None, timeout: float = 30, **kwargs) -> tup
         content = await r.text()
         status = r.status
     return content, status
-
-
-# ==================== SESSION ====================
-
-
-def m2d(morsel: Morsel) -> dict:
-    cookie = dict()
-    cookie["basic"] = morsel.__dict__
-    cookie["extra"] = dict(morsel.items())
-    return cookie
-
-
-def d2m(cookie: dict) -> Morsel:
-    morsel = Morsel()
-    dict.update(morsel, cookie["extra"])
-    morsel.__dict__.update(cookie["basic"])
-    return morsel
-
-
-class Session:
-    def __init__(self, cookie_file: str, timeout: float = 30, **kwargs):
-        self.cookie_file = cookie_file
-        self.timeout = aiohttp.ClientTimeout(total=timeout)
-        self.kwargs = kwargs
-        self.session = aiohttp.ClientSession()
-        self.inited = False
-
-    async def init(self):
-        assert self.inited is False, 'Session has been inited'
-        self.inited = True
-        self.session = aiohttp.ClientSession(
-            timeout=self.timeout, **self.kwargs)
-        try:
-            self.load_cookie()
-        except Exception as e:
-            eprint(e, msg=f'Failed to load cookie: {
-                   self.cookie_file}', stacklevel=1)
-
-    @property
-    def cookie_jar(self):
-        return self.session.cookie_jar
-
-    def __del__(self):
-        self.inited and self.save_cookie()  # type: ignore
-
-    def load_cookie(self, cookie_file: Optional[str] = None):
-        if cookie_file is None:
-            cookie_file = self.cookie_file
-        cookies = json.load(Path(cookie_file).open("r"))
-        cookies = [(cookie["basic"]["_key"], d2m(cookie))
-                   for cookie in cookies]
-        self.cookie_jar.update_cookies(cookies)
-
-    def save_cookie(self, cookie_file: Optional[str] = None):
-        if cookie_file is None:
-            cookie_file = self.cookie_file
-        cookies = [m2d(cookie) for cookie in self.cookie_jar]
-        json.dump(cookies, Path(cookie_file).open("w"),
-                  ensure_ascii=False, indent=4, default=str)
-
-    def output_cookie(self):
-        for name, cookies in self.cookie_jar._cookies.items():  # type: ignore
-            print(name)
-            print(cookies)
-        print()
-
-    @attempt(3)
-    async def get(self, url: str, **kwargs) -> bytes:
-        not self.inited and await self.init()  # type: ignore
-        async with self.session.request('GET', url, **kwargs) as r:
-            content = await r.read()
-        return content
-
-    @attempt(3)
-    async def get_headers(self, url: str, field: list[str], **kwargs) -> list[tuple[str, str]]:
-        not self.inited and await self.init()  # type: ignore
-        async with self.session.request('GET', url, **kwargs) as r:
-            headers = r.headers
-        return list(filter(lambda x: x[0].lower() in field, headers.items()))
-        # if field is not None:
-        #     return list(filter(lambda x: x[0].lower() in field, headers.items()))
-        # return headers
-
-    @attempt(3)
-    async def get_json(self, url: str, **kwargs) -> dict | list:
-        not self.inited and await self.init()  # type: ignore
-        async with self.session.request('GET', url, **kwargs) as r:
-            data = await r.json()
-        return data
-
-    @attempt(3)
-    async def get_dict(self, url: str, **kwargs) -> dict:
-        not self.inited and await self.init()  # type: ignore
-        async with self.session.request('GET', url, **kwargs) as r:
-            data = await r.json()
-        assert isinstance(data, dict), f'Expect dict, but got {type(data)}'
-        return data
-
-    @attempt(3)
-    async def post_json(self, url: str, data, **kwargs) -> dict | list:
-        not self.inited and await self.init()  # type: ignore
-        async with self.session.request('POST', url, data=data, **kwargs) as r:
-            data = await r.json()
-        return data
-
-    @attempt(3)
-    async def post_dict(self, url: str, data, **kwargs) -> dict:
-        not self.inited and await self.init()  # type: ignore
-        async with self.session.request('POST', url, data=data, **kwargs) as r:
-            data = await r.json()
-        assert isinstance(data, dict), f'Expect dict, but got {type(data)}'
-        return data
-
-
-# ==================== OTHER ====================
-
-
-async def rss(url: str, timeout: float = 30, **kwargs):
-    content = await get(url, timeout=timeout, **kwargs)
-    if not content.startswith(b'<?xml'):
-        if b"Error message: this route is empty" in content:
-            return feedparser.FeedParserDict(entries=[])
-    return feedparser.parse(BytesIO(content))
