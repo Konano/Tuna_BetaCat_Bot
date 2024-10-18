@@ -19,8 +19,8 @@ from base.config import accessToken, group, pipe, webhookConfig
 from base.log import logger
 from base.mute import mute, mute_show, unmute
 from base.pool import auto_delete
-from command.gadget import (callpolice, fan, gu, new_message, payme,
-                            payme_upload, register, roll, san, yue)
+from command.gadget import (callpolice, fan, gu, payme, payme_upload, register,
+                            roll, san, yue)
 from command.heartbeat import send_heartbeat
 from command.info import daily_report, info
 from command.weather import (realtime_forecast, realtime_weather, weather_poll,
@@ -84,16 +84,8 @@ def main():
     allCommands.append(('roll', '从 1 开始的随机数', 81))
     app.add_handler(CommandHandler('callpolice', callpolice))
     allCommands.append(('callpolice', '在线报警', 82))
-    # app.add_handler(CommandHandler('washer', washer))
-    # allCommands.append(('washer', '洗衣机在线状态', 83))
     app.add_handler(CommandHandler('register', register))
-    allCommands.append(('register', '一键注册防止失学', 84))
-
-    # app.add_handler(CommandHandler('hitreds', hitreds, filters=(~f_group)))
-    # allCommands.append(('hitreds', '一键打红人', 101))
-    # app.add_handler(CommandHandler('spankreds', hitreds, filters=(~f_group)))
-    # allCommands.append(('spankreds', '给红人来一巴掌', 102))
-    # job.run_daily(hitreds_init, time=time(0, 0, 0, tzinfo=tz))
+    allCommands.append(('register', '一键注册防止失学', 83))
 
     # ===== yue =====
     app.add_handler(CommandHandler('payme', payme, filters=f_group))

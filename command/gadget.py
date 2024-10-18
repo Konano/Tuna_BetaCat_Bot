@@ -14,7 +14,6 @@ from pyzbar.pyzbar import decode
 from telegram import InputMediaPhoto, Update
 from telegram.ext import ContextTypes
 
-# import base.caiyun as cy
 from base.debug import eprint
 from base.format import escaped
 from base.log import logger
@@ -28,10 +27,6 @@ async def roll(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f'Choose: {rd.randint(1, int(context.args[0]))}')
     except:
         await update.message.reply_text('Usage: /roll [total]')
-
-
-async def new_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    cy.update_newmsg()
 
 
 async def callpolice(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -105,58 +100,6 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
         Path(pic).unlink()
     except:
         await update.message.reply_text('Usage: /register [StudentID] [Month]\nExample: /register 1994990239 202102')
-
-
-# try:
-#     hitcount, hitchatid = json.load(open('data/hitred.json', 'r'))
-#     hitchatid = dict((int(k), hitchatid[k]) for k in hitchatid.keys())
-# except Exception as e:
-#     logger.debug(traceback.format_exc())
-#     logger.error(e)
-#     hitcount, hitchatid = 0, {}
-
-
-# def hitred_aim():
-#     global hitcount
-#     aim = 1
-#     while aim <= hitcount:
-#         aim *= 2
-#     return aim
-
-
-# async def hitreds(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     global hitcount, hitchatid
-#     hitcount += 1
-#     if update.message.chat_id not in hitchatid.keys():
-#         hitchatid[update.message.chat_id] = 0
-#     try:
-#         msg = await update.message.reply_text(f'打红人计数器 ({hitcount}/{hitred_aim()})')
-#         add_pool(msg)
-#         hitchatid[update.message.chat_id] += 1
-#         json.dump([hitcount, hitchatid], open('data/hitred.json', 'w'))
-#     except Exception as e:
-#         logger.debug(traceback.format_exc())
-#         logger.error(e)
-
-
-# async def hitreds_init(context: ContextTypes.DEFAULT_TYPE):
-#     global hitcount, hitchatid
-#     __hitchatid = hitchatid
-#     hitchatid = {}
-#     json.dump([hitcount, hitchatid], open('data/hitred.json', 'w'))
-
-#     today_hitcount = 0
-#     for x in __hitchatid.keys():
-#         today_hitcount += __hitchatid[x]
-
-#     for chatid in __hitchatid.keys():
-#         group_or_chat = '本群' if chatid < 0 else '您'
-#         try:
-#             await context.bot.send_message(
-#                 chatid, f'红人昨日被打次数: {today_hitcount}\n{group_or_chat}昨日打红人次数: {__hitchatid[chatid]}\n红人 @ZenithalH 万分感谢您的支持！')
-#         except Exception as e:
-#             logger.debug(traceback.format_exc())
-#             logger.error(e)
 
 
 users = {}
