@@ -10,6 +10,7 @@ import numpy as np
 from PIL import Image
 from pytz import timezone
 from telegram import Bot, InputMediaPhoto, Message, Update
+from telegram.error import TimedOut
 from telegram.ext import ContextTypes
 
 from base.config import channel, config, group
@@ -34,7 +35,7 @@ except Exception:
     caiyunData = {}
 
 
-@try_except(level=logging.DEBUG, return_value=False, exclude=(CaiyunAPIError))
+@try_except(level=logging.DEBUG, return_value=False, exclude=(CaiyunAPIError,))
 async def weather_update():
     """更新彩云天气数据"""
     global caiyunData
@@ -230,7 +231,8 @@ except Exception:
     weather_report_msgid = {'group': 0, 'channel': 0}
 
 
-async def weather_report(context: ContextTypes.DEFAULT_TYPE):
+@try_except(exclude=(TimedOut,))
+async def weather_report(context: ContextTypes.DEFAULT_TYPE) -> None:
     """定时发送或者更新天气预报"""
     assert context.job
     hour = cast(int, context.job.data)
