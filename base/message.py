@@ -1,6 +1,7 @@
 import logging
 
 from telegram import Bot
+from telegram.error import TimedOut
 
 from base.debug import try_except
 
@@ -15,7 +16,7 @@ Using "msg" instead of "message" to avoid conflict with the message module in th
 """
 
 
-@try_except(level=logging.DEBUG, return_value=False)
+@try_except(level=logging.DEBUG, return_value=False, exclude=(TimedOut,))
 async def delete_msg(chat_id: str | int, message_id: int, **kwargs):
     """
     Delete a message.
@@ -24,7 +25,7 @@ async def delete_msg(chat_id: str | int, message_id: int, **kwargs):
     await bot.delete_message(chat_id=chat_id, message_id=message_id, **kwargs)
 
 
-@try_except(level=logging.DEBUG, return_value=False)
+@try_except(level=logging.DEBUG, return_value=False, exclude=(TimedOut,))
 async def edit_msg_text(chat_id: str | int, message_id: int, text: str, **kwargs):
     """
     Edit the text of a message.
@@ -33,7 +34,7 @@ async def edit_msg_text(chat_id: str | int, message_id: int, text: str, **kwargs
     await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text, **kwargs)
 
 
-@try_except(level=logging.DEBUG, return_value=False)
+@try_except(level=logging.DEBUG, return_value=False, exclude=(TimedOut,))
 async def send_msg(chat_id: str | int, text: str, **kwargs):
     """
     Send a message.
@@ -42,7 +43,7 @@ async def send_msg(chat_id: str | int, text: str, **kwargs):
     await bot.send_message(chat_id=chat_id, text=text, **kwargs)
 
 
-@try_except(level=logging.DEBUG, return_value=False)
+@try_except(level=logging.DEBUG, return_value=False, exclude=(TimedOut,))
 async def edit_msg_media(chat_id: str | int, message_id: int, media, **kwargs):
     """
     Edit the media of a message.
