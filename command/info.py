@@ -67,8 +67,13 @@ async def daily_report(context: ContextTypes.DEFAULT_TYPE):
     text = 'Today Info:'
     today = info_daily()
     for source in today.keys():
-        text += '\n \\- %s' % escaped(source)
+        _text = ' \\- %s' % escaped(source)
         for news in today[source]:
-            text += '\n[%s](%s)' % (escaped(news['title']), news['url'])
+            _text += '\n[%s](%s)' % (escaped(news['title']), news['url'])
+        if len(text + '\n' + _text) > 4096:
+            await context.bot.send_message(
+                chat_id=group, text=text, parse_mode='MarkdownV2', disable_web_page_preview=True)
+            text = 'Today Info:'
+        text += '\n' + _text
     await context.bot.send_message(
         chat_id=group, text=text, parse_mode='MarkdownV2', disable_web_page_preview=True)
